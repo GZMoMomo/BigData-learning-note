@@ -102,3 +102,23 @@ df_tenure_box.value_counts(normalize=True).sort_index()
 #分箱（左包含 false）
 pd.cut(range(10),bins=5,right=False)
  ```
+```
+df_tenure_box.value_counts().sort_index().values
+
+import matplotlib.pyplot as plt
+plt.figure(figsize=(20,10))
+plt.bar(range(12),df_tenure_box.value_counts().sort_index().values,tick_label=df_tenure_box.value_counts(normalize=True).sort_index().index)
+plt.show()
+
+import seaborn as sns
+import matplotlib.pyplot as plt
+tips=sns.load_dataset("tips")
+print(tips.shape)
+tips.head(10)
+
+sns.scatterplot(x="total_bill",y="tip",data=tips)
+plt.show()
+
+sns.scatterplot(df['tenure'],df['MonthlyCharges'])
+plt.show()
+```
