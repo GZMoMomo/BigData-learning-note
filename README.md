@@ -96,29 +96,49 @@ df.info()
  ```
  对数值型数据进行分箱处理
  ```
-df_tenure_box = pd.cut(df['tenure'],bins=[-111,0,10,20,30,40,50,60,70,80,90,100,8500])
-df_tenure_box.value_counts(normalize=True).sort_index()
+df_tenure_boxes, df_tenure_boxes_labels = pd.cut(df['tenure'],bins=[-111,0,10,20,30,40,50,60,70,80,90,100,8500],right=False,retbins=True,include_lowest=True)
+df_tenure_boxes.value_counts(normalize=True).sort_index()
 
 #分箱（左包含 false）
+bins：分类依据的标准，可以是int、标量序列或间隔索引(IntervalIndex)
+right：是否包含bins区间的最右边，默认为True，最右边为闭区间，False则不包含
+labels：要返回的标签，和bins的区间对应
+retbins：是否返回bins,当bins作为标量时使用非常有用，默认为False
+precision：精度，int类型
+include_lowest：第一个区间是否为左包含(左边为闭区间)，默认为False,表示不包含，True则包含
+duplicates：可选，默认为{default 'raise', 'drop'}，如果 bin 边缘不是唯一的，则引发 ValueError 或删除非唯一的。
+ordered：默认为True，表示标签是否有序。如果为 True，则将对生成的分类进行排序。如果为 False，则生成的分类将是无序的（必须提供标签）
+
 pd.cut(range(10),bins=5,right=False)
  ```
 ```
-df_tenure_box.value_counts().sort_index().values
+分箱标签
+df_tenure_boxes_labels
+分箱标签值
+df_tenure_boxes.value_counts().sort_index().values
 
+#绘制柱状图
 import matplotlib.pyplot as plt
 plt.figure(figsize=(20,10))
-plt.bar(range(12),df_tenure_box.value_counts().sort_index().values,tick_label=df_tenure_box.value_counts(normalize=True).sort_index().index)
+plt.bar(range(12),df_tenure_boxes.value_counts().sort_index().values,tick_label=df_tenure_boxes.value_counts(normalize=True).sort_index().index)
 plt.show()
 
+#导入包
 import seaborn as sns
 import matplotlib.pyplot as plt
-tips=sns.load_dataset("tips")
+tips=sns.load_dataset("tips") #数据集
 print(tips.shape)
 tips.head(10)
 
+#散点图
 sns.scatterplot(x="total_bill",y="tip",data=tips)
 plt.show()
 
+#散点图
 sns.scatterplot(df['tenure'],df['MonthlyCharges'])
+plt.show()
+
+#密度分布直方图
+sns.distplot(df['tenure'])
 plt.show()
 ```
