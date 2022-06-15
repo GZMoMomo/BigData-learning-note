@@ -142,3 +142,97 @@ plt.show()
 sns.distplot(df['tenure'])
 plt.show()
 ```
+### 数据预处理
+```
+#查看object类型数据的具体数据类别
+#添加numpy包
+import numpy as np
+df_types = df.dtypes
+for col in df.dtypes.index:
+    if df_types[col] == object:
+        print('*' * 50)
+        print(col + ':')
+        print(len(np.unique(df[col])))
+        print(np.unique(df[col]))
+
+#将object类型的数字转化成浮点型
+df['TotalCharges'] = pd.to_numeric(df['TotalCharges'],errors='coerce')
+df.info()
+
+#查看Nan个数
+df['TotalCharges'].isna().value_counts()
+
+#查看重复个数
+df['customerID'].duplicated().value_counts()
+```
+#### 异常值处理 （箱型图检测异常值）
+1.利用四分位数来确定异常值  
+四分位间距 = 上四分位数 - 下四分位数  
+数据下界 = 下四分位数 - k * 四分位间距  
+数据上界 = 上四分位数 - k * 四分位间距
+
+异常值一般位于数据上界和数据下界之外，一般情况下 k 取1.5-3之间的数，k越小，正常值的范围越小，检测异常值的敏感性越高；k越大正常值的范围越大，检测异常值的敏感性越低。 
+```
+#利用四分位间距检测异常值(需根据业务调整)
+for col in ['SeniorCitizen','tenure','MonthlyCharges','TotalCharges']:
+    print('*' * 50)
+    print(col)
+    #求上四分位数
+    q_75 = df[col].quantile(q=0.75)
+    print('上四分位数：',q_75)
+    #求下四分位数
+    q_25 = df[col].quantile(q=0.25)
+    print('下四分位数：',q_25)
+    #求四分位间距
+    d = q_75-q_25
+    print('四分位间距：',d)
+    #求数据上界和数据下界
+    data_top = q_75+1.5*d
+    data_bottom = q_25-1.5*d
+    print('数据上界：',data_top)
+    print('数据下界：',data_bottom)
+    #查看异常值
+    print('异常值的个数：',len(df[(df[col]>data_top)|(df[col]<data_bottom)]))
+```
+保留非异常数据
+```
+df = df[df['tenure']>=0]
+print(df.shape)
+```
+剔除重复的字段数据
+```
+df = df.drop_duplicates(subset=['customerID'])
+print(df.shape)
+```
+独热化处理
+```
+#独热化处理
+#需要独热化处理的字段名
+need_onehot_cols = ['MultipleLines','InternetService','OnlineSecurity','OnlineBackup','DeviceProtection','TechSupport']
+
+#进行独热化处理
+from sklearn.preprocessing import OneHotEncoder
+
+for col in need_onehot_cols:
+    print(col)
+    #创建独热化实例
+    onehot=OneHotEncoder()
+    #独热化训练
+    onehot.fit(np.array(df[col]).reshape(-1,1))
+    #获取独热化后的字段名
+    new_cols = onehot.get_feature_names([col]).tolist()
+    print(new_cols)
+    #将独热化后的数据转化成DataFrame
+    onehot_value = pd.DataFrame(onehot.transform(np.array(df[col]).reshape(-1,1)).toarray(),columns=new_cols)
+    #将独热化后的数据添加到原数据里
+    df[new_cols]=onehot_value
+    
+print(df.shape)
+df.head()
+```
+删除经过独热化处理后的字段
+```
+#删除经过独热化处理后的字段
+df.drop(columns=need_onehot_cols,inplace=True)
+df.head(10)
+```
