@@ -236,3 +236,18 @@ df.head()
 df.drop(columns=need_onehot_cols,inplace=True)
 df.head(10)
 ```
+数值化处理
+```
+#数值化处理
+map_dict = {'Male':1,'Female':0,'Yes':1,'No':0}
+df.replace(map_dict,inplace=True)
+df.head(10)
+```
+查看空值
+```
+df.isna().any(axis=1).value_counts()
+```
+填充空值
+```
+df.fillna(0,inplace=True)
+```
