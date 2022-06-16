@@ -251,3 +251,50 @@ df.isna().any(axis=1).value_counts()
 ```
 df.fillna(0,inplace=True)
 ```
+#### 数据的标准化和归一化
+特点  
+（1）标准化特点
+对不同特征维度的伸缩变换的目的是使得不同度量之间的特征具有可比性。同时不改变原始数据的分布。好处：
+1 使得不同度量之间的特征具有可比性，对目标函数的影响体现在几何分布上，而不是数值上
+2 不改变原始数据的分布  
+
+（2）归一化特点
+对不同特征维度的伸缩变换的目的是使各个特征维度对目标函数的影响权重是一致的，即使得那些扁平分布的数据伸缩变换成类圆形。这也就改变了原始数据的一个分布。好处：
+1 提高迭代求解的收敛速度
+2 提高迭代求解的精度  
+
+区别  
+归一化：缩放仅仅跟最大、最小值的差别有关。 输出范围在0-1之间
+
+标准化：缩放和每个点都有关系，通过方差（variance）体现出来。与归一化对比，标准化中所有数据点都有贡献（通过均值和标准差造成影响）。输出范围是负无穷到正无穷  
+
+1.数据的标准化  
+z=(x-u)/std  (u:均值）
+
+2.数据的归一化  
+minmax=(x-min)/(max-min)  
+
+归一化处理
+```
+# 归一化处理
+from sklearn.preprocessing import MinMaxScaler,StandardScaler
+df_copy = df.copy()
+cols_need_to_minmax = ['tenure','MonthlyCharges','TotalCharges']
+for col in cols_need_to_minmax:
+    minmax = MinMaxScaler()
+    df_copy[col+'_minmax'] = minmax.fit_transform(np.array(df_copy[col]).reshape(-1,1))
+    
+df_copy.describe().T
+```
+标准化处理
+```
+# 标准化处理
+from sklearn.preprocessing import MinMaxScaler,StandardScaler
+df_copy = df.copy()
+cols_need_to_standard = ['tenure','MonthlyCharges','TotalCharges']
+for col in cols_need_to_standard:
+    standard = StandardScaler()
+    df_copy[col+'_standard'] = standard.fit_transform(np.array(df_copy[col]).reshape(-1,1))
+    
+df_copy.describe().T
+```
