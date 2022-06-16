@@ -298,3 +298,4 @@ for col in cols_need_to_standard:
     
 df_copy.describe().T
 ```
+# Hadoop
