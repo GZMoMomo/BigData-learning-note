@@ -373,5 +373,24 @@ HDFS写数据流程
 8. 当一个block传输完成之后，客户端会再次请求namenode上传第二个block的服务器
 
 HDFS NameNode元数据存储
-  如果元数据存储在NameNode节点的磁盘中，因为需要频繁进行随机访问，还有响应客户请求，必然效率过低。因此，元数据需要存放在内存中。但如果只存在内存中，一旦断电，元数据就会丢失。因此产生在磁盘中备份元数据的FsImage。
-   但当在内存中的元数据更新，同时更新FsImage，还是会效率低，如果不更新，就会发生一致性问题，一旦断电就会产生数据丢失。因此引入Edits文件（只进行追加操作，效率很高）。每当元数据有更新或添加元数据时，修改内存中的元数据并追加到Edits中。并且定期进行FsImage和Edits合并。并且引入一个新的节点SecondaryNameNode专门用于这项任务。
+  - 如果元数据存储在NameNode节点的磁盘中，因为需要频繁进行随机访问，还有响应客户请求，必然效率过低。因此，元数据需要存放在内存中。但如果只存在内存中，一旦断电，元数据就会丢失。因此产生在磁盘中备份元数据的FsImage。
+   - 1但当在内存中的元数据更新，同时更新FsImage，还是会效率低，如果不更新，就会发生一致性问题，一旦断电就会产生数据丢失。因此引入Edits文件（只进行追加操作，效率很高）。每当元数据有更新或添加元数据时，修改内存中的元数据并追加到Edits中。并且定期进行FsImage和Edits合并。并且引入一个新的节点SecondaryNameNode专门用于这项任务。
+
+NameNode工作机制  
+![image](https://user-images.githubusercontent.com/91240419/187452742-bcf13ca6-1ee3-4bda-a0dc-d0a71eb3a56c.png)
+第一阶段：NameNode启动
+1. 第一次启动NameNode格式化后，创建Fsimage和Edits文件，如果不是第一次启动，直接加载编辑日志和镜像文件到内存。
+2. 客户端对元数据进行增删改的请求。
+3. NameNode记录操作日志，更新滚动日志。
+4. NameNode在内存中对元数据进行增删改
+
+第二阶段：Secondary NameNode工作
+1. 2NN询问NameNode是否需要CheckPoint。直接待会NameNode是否检查结果。
+2. 2NN请求执行CheckPoint
+3. NameNode滚动正在写的Edits日志
+4. 将滚动前的编辑日志和镜像文件拷贝到2NN。
+5. 2NN加载编辑日志和镜像文件到内存并合并。
+6. 生成新的镜像文件fsimage.chekpoint
+7. 拷贝到NameNode
+8. 重命名新的镜像文件为fsimage。
+
