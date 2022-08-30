@@ -1,6 +1,6 @@
 # BigData-learning-note
 大数据相关知识学习之路
-# Python数据分析挖掘
+## Python数据分析挖掘
 ## Pandas
 Pandas官网 IO tools https://pandas.pydata.org/docs/user_guide/io.html  
 导入科学工具包  ``` import pandas as pd ```  
@@ -299,3 +299,46 @@ for col in cols_need_to_standard:
 df_copy.describe().T
 ```
 # Hadoop
+### MapReduce
+MapReduce是一个分布式运算程序的编程框架  
+- MapReduce易于编程    
+- 良好的扩展性  
+- 高容错性  
+- 适合PB级以上海量数据的离线处理  
+
+缺点：  
+- 不擅长实时计算  
+- 不擅长流式计算  
+- 不擅长DAG（有向无环图）计算  
+  - 多个应用程序存在依赖关系，后一个应用程序的输入为前一个的输出。在这种情况下，MapReduce并不是不能做，而是使用后，每个MapReduce作业的输出结果都会写入到磁盘，会造成大量的磁盘IO，导致性能非常的低下。 
+  
+MapReduce核心思想
+- 分布式的运算程序往往需要分成至少2个阶段。  
+- 第一个阶段的MapTask并发实例，完全并行运行，互不相干。  
+- 第二个阶段的ReduceTask并发实例互不相干，但是他们的数据依赖于上一个阶段的所有MapTask并发实例的输出。  
+- MapReduce编程模型只能包含一个Map阶段和一个Reduce阶段，如果用户的业务逻辑非常复杂，那就只能多个MapReduce程序，串行运行。  
+MrAppMaster：负责整个程序的过程调度及状态协调。  
+#### Mapper
+切片与MapTask并行度决定机制  
+- 数据块：Block是HDFS物理上把数据分成一块一块。数据块是HDFS存储数据单位。
+- 数据切片：数据切片只是在逻辑上对输入进行分片，并不会在磁盘上将其切分成片进行存储。数据切片是MapReduce程序计算输入数据的单位，一个切片会对应启动一个MapTask。
+- MapTask的并行度决定Map阶段的任务处理并发度，进而影响到整个Job的处理速度。
+一个Job的Map阶段并行度由客户端在提交Job时的切片数决定。  
+![image](https://user-images.githubusercontent.com/91240419/187334872-e0a2ebe5-a25c-42ef-a95c-3f083af74c56.png)
+![image](https://user-images.githubusercontent.com/91240419/187334885-0e31df5f-302f-420d-a0ae-6daeab8126a0.png)
+
+#### Shuffle
+1. MapTask收集我们的map()方法输出的kv对，放到内存缓冲区中
+2. 从内存缓冲区不断溢出本地磁盘文件，可能会溢出多个文件
+3. 多个溢出文件会被合并成大的溢出文件
+4. 在溢出过程及合并的过程中，都要调用Partitioner进行分区和针对key进行排序
+5. ReduceTask根据自己的分区号，去各个MapTask机器上取相应的结果分区数据
+6. ReduceTask会抓取到同一个分区的来自不同MapTask的结果文件，ReduceTask会将这些文件再进行合并（归并排序）
+7. 合并成大文件后，Shuffle的过程也就结束了，后面进入ReduceTask的逻辑运算过程（从文件中取出一个一个的键值对Group，调用用户自定义的reduce()方法）
+![image](https://user-images.githubusercontent.com/91240419/187335261-d8889d61-6f10-41f0-af0a-387797777742.png)
+
+排序概述  
+- MapTask处理的结果暂时放到环形缓冲区中，当环形缓冲区使用率达到80%的时候，再对缓冲区中的数据进行一次快速排序，并将这些有序数据溢写到磁盘上，当数据处理完毕后，它会对磁盘上的所有文件进行归并排序。
+- ReduceTask会从每个MapTask上远程拷贝相应的数据文件，如果文件大小超过一定阈值，则溢写到磁盘上，否则存储在内存中。如果磁盘上文件数目达到一定阈值，则进行一次归并排序生成一个更大的文件，如果内存中文件大小或者数目超过一定阈值，则进行一次合并后将数据溢写到磁盘上。当所有数据拷贝完成后，ReduceTask统一对内存和磁盘上的所有数据进行一次归并排序。
+
+
