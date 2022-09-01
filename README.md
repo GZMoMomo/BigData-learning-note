@@ -420,3 +420,9 @@ DataNode保证数据完整性的方法。
   - 条带化：原本块对应文件内连续的一大段数据。条带化后，连续的数据按条带间隔交错的分布在不同的块中。
   - Reed Solomon算法：参考Reed-solomon codes
   - 成本更低：多副本方案需要冗余存储整个块，EC方案需要荣誉存储的数据一般更少。
+
+### Yarn基础架构  
+![image](https://user-images.githubusercontent.com/91240419/187857180-ccb7a32e-47ee-4b16-98e6-477abaf86e38.png)
+Yarn 工作机制  
+![image](https://user-images.githubusercontent.com/91240419/187858064-4556c5a8-286a-4529-859d-38c10016c40c.png)
+
