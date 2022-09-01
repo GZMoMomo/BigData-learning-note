@@ -5,7 +5,7 @@ https://zhuanlan.zhihu.com/p/172513484
 ## 分库分表（面试重点）
 https://zhuanlan.zhihu.com/p/393944582
 ## 为什么要避免超过三张表的join（面试重点）
-https://zhuanlan.zhihu.com/p/393944582
+[https://zhuanlan.zhihu.com/p/393944582](https://www.zhihu.com/question/56236190)
 ## Python数据分析挖掘
 ## Pandas
 Pandas官网 IO tools https://pandas.pydata.org/docs/user_guide/io.html  
