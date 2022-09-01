@@ -1,5 +1,6 @@
 # BigData-learning-note
 大数据相关知识学习之路
+## 分库分表（面试重点）
 ## 为什么要避免超过三张表的join（面试重点）
 https://zhuanlan.zhihu.com/p/393944582
 ## Python数据分析挖掘
