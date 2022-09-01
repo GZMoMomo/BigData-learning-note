@@ -394,3 +394,19 @@ NameNode工作机制
 7. 拷贝到NameNode
 8. 重命名新的镜像文件为fsimage。
 
+Fsimage文件：HDFS文件系统元数据的一个永久性的检查点，其中包含HDFS文件系统的所有目录和文件inode的序列化信息。  
+Edits文件：存放HDFS文件系统的所有更新操作的路径，文件系统客户端执行的所有写操作首先会被记录到Edits文件中。  
+每次NameNode启动的时候都会将Fsimage文件读入内存，加载Edits里面的更新操作，保证内存中的元数据信息是最新的、同步的，可以堪称NameNode启动的时候就将Fsimage和Edits文件进行合并。
+
+DataNode工作机制  
+![image](https://user-images.githubusercontent.com/91240419/187814263-372ccf4d-04fe-49cf-96b0-6666aebada52.png)  
+1. 一个数据块在DataNode上以文件形式存储在磁盘上，包括两个文件，一个是数据本身，一个是元数据包括数据块的长度，块数据的校验和，以及时间戳。
+2. DataNode启动后向NameNode注册，通过后，周期性（六小时）的向NameNode上报所有块信息。
+3. 心跳是每三秒一次，心跳返回结果带有NameNode给该DataNode的命令如复制块数据到另一台机器或删除某个数据块。如果超过十分钟没有收到某个DataNode的心跳，则认为该节点不可用。
+
+DataNode保证数据完整性的方法。
+1. 当DataNode读取Block的时候，它会计算CheckSum
+2. 如果计算后的CheckSum，与Block创建时值不一样，说明Block已经损坏
+3. Client读取其他DataNode上的Block
+4. 常见的校验算法crc，md5，sha1
+5. DataNode在文件创建后周期验证CheckSum
