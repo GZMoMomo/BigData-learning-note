@@ -1,5 +1,7 @@
 # BigData-learning-note
 大数据相关知识学习之路
+## 分库分表（面试重点）
+https://zhuanlan.zhihu.com/p/393944582
 ## Python数据分析挖掘
 ## Pandas
 Pandas官网 IO tools https://pandas.pydata.org/docs/user_guide/io.html  
@@ -410,3 +412,10 @@ DataNode保证数据完整性的方法。
 3. Client读取其他DataNode上的Block
 4. 常见的校验算法crc，md5，sha1
 5. DataNode在文件创建后周期验证CheckSum
+
+数据高可用  
+1. HDFS Erasure Coding方案
+2. 将数据分段，通过特殊的编码方式存储额外的校验块，并条带化的组成块，存储在DN上。
+  - 条带化：原本块对应文件内连续的一大段数据。条带化后，连续的数据按条带间隔交错的分布在不同的块中。
+  - Reed Solomon算法：参考Reed-solomon codes
+  - 成本更低：多副本方案需要冗余存储整个块，EC方案需要荣誉存储的数据一般更少。
